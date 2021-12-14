@@ -3,3 +3,7 @@
 
 src/template/target
 .dfx
+node_modules/
+target/
+dist/
+src/declarations/

@@ -106,7 +106,7 @@ fn total_supply() -> Nat {
 #[post_upgrade]
 fn post_update() {
     unsafe {
-        TotalSupply = Some(1000000);
+        TotalSupply = Some(1000000.into());
         CurrentSupply = Some(0.into());
         Symbol = Some("ICP".to_string());
     }
