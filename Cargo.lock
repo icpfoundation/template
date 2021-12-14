@@ -202,7 +202,7 @@ checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 [[package]]
 name = "chain_cloud_util"
 version = "0.1.0"
-source = "git+https://github.com/icpfoundation/chain_cloud_util.git#435f5cdb69b04418684efb32cb5945c1a2af68bc"
+source = "git+https://github.com/icpfoundation/chain_cloud_util.git?branch=dev#a2a2a77ab61359aa884c8872da12448fdec61679"
 dependencies = [
  "event",
  "event_macro",
@@ -339,7 +339,7 @@ dependencies = [
 [[package]]
 name = "event"
 version = "0.1.0"
-source = "git+https://github.com/icpfoundation/chain_cloud_util.git#435f5cdb69b04418684efb32cb5945c1a2af68bc"
+source = "git+https://github.com/icpfoundation/chain_cloud_util.git?branch=dev#a2a2a77ab61359aa884c8872da12448fdec61679"
 dependencies = [
  "ic-cdk",
 ]
@@ -347,7 +347,7 @@ dependencies = [
 [[package]]
 name = "event_macro"
 version = "0.1.0"
-source = "git+https://github.com/icpfoundation/chain_cloud_util.git#435f5cdb69b04418684efb32cb5945c1a2af68bc"
+source = "git+https://github.com/icpfoundation/chain_cloud_util.git?branch=dev#a2a2a77ab61359aa884c8872da12448fdec61679"
 dependencies = [
  "event",
  "ic-cdk",
