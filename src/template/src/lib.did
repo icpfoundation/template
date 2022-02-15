@@ -7,4 +7,5 @@ service:(nat,text) ->{
     "symbol":() -> (text) query;
     "current_supply":()->(nat)query ;
     "total_supply":() -> (nat) query;
+    "getmemory":() ->();
 }

@@ -15,13 +15,16 @@ type BalanceOf = HashMap<Principal, Nat>;
 struct MintEvent {
     method_name: String,
     memo: String,
+    cycle_accept: Nat,
 }
 
 #[derive(Event)]
 struct TransferEvent {
     method_name: String,
     memo: String,
+    cycle_accept: Nat,
 }
+
 #[init]
 fn init(total_supply: Nat, symbol: String) {
     unsafe {
@@ -42,36 +45,47 @@ async fn mint(account: Principal, amount: Nat) -> () {
         CurrentSupply = Some(current)
     }
     let balance_table = storage::get_mut::<BalanceOf>();
-    let balance = balance_table.get(&account).cloned().unwrap_or_else(|| Nat::default());
+    let balance = balance_table
+        .get(&account)
+        .cloned()
+        .unwrap_or_else(|| Nat::default());
     let new_balance = balance + amount.clone();
     balance_table.insert(account, new_balance);
     let memo = format!("{:?} mint {:?} token", account.to_string(), amount);
-    api::print(&memo);
     let mint_event = MintEvent {
         method_name: "mint".to_string(),
         memo: memo,
+        cycle_accept: 0.into(),
     };
-    emit(mint_event).await;
+    let result = emit(mint_event).await;
+    let result = format!("{:?}", result);
+    ic_cdk::print(result);
 }
 
 #[update]
 async fn transfer(to: Principal, amount: Nat) -> () {
     let caller = api::caller();
     let balance_table = storage::get_mut::<BalanceOf>();
-    let balance = balance_table.get(&caller).cloned().unwrap_or_else(|| Nat::default());
+    let balance = balance_table
+        .get(&caller)
+        .cloned()
+        .unwrap_or_else(|| Nat::default());
     if balance < amount {
         api::trap("Sorry, your credit is running low")
     }
     let new_balance = balance - amount.clone();
     balance_table.insert(caller, new_balance);
-    let to_balance = balance_table.get(&to).cloned().unwrap_or_else(|| Nat::default());
+    let to_balance = balance_table
+        .get(&to)
+        .cloned()
+        .unwrap_or_else(|| Nat::default());
     let to_new_balance = to_balance + amount.clone();
     balance_table.insert(to, to_new_balance);
-    let memo = format!("{:?} transfer {:?}",caller.to_string(),amount);
-    api::print(&memo);
+    let memo = format!("{:?} transfer {:?}", caller.to_string(), amount);
     let transfer_event = TransferEvent {
         method_name: "transfer".to_string(),
         memo: memo,
+        cycle_accept: 0.into(),
     };
     emit(transfer_event).await;
 }
@@ -79,34 +93,31 @@ async fn transfer(to: Principal, amount: Nat) -> () {
 #[query]
 fn balance_of(account: Principal) -> Nat {
     let balance_table = storage::get::<BalanceOf>();
-    balance_table.get(&account).cloned().unwrap_or_else(|| Nat::default())
+    balance_table
+        .get(&account)
+        .cloned()
+        .unwrap_or_else(|| Nat::default())
 }
 
 #[query]
 fn symbol() -> String {
-    unsafe{
-        Symbol.as_ref().unwrap().clone()
-    }
+    unsafe { Symbol.as_ref().unwrap().clone() }
 }
 
 #[query]
 fn current_supply() -> Nat {
-    unsafe{
-        CurrentSupply.as_ref().unwrap().clone()
-    }
+    unsafe { CurrentSupply.as_ref().unwrap().clone() }
 }
 
 #[query]
 fn total_supply() -> Nat {
-    unsafe{
-        TotalSupply.as_ref().unwrap().clone()
-    }
+    unsafe { TotalSupply.as_ref().unwrap().clone() }
 }
 
 #[post_upgrade]
 fn post_update() {
     unsafe {
-        TotalSupply = Some(1000000.into());
+        TotalSupply = Some(1000000000.into());
         CurrentSupply = Some(0.into());
         Symbol = Some("ICP".to_string());
     }
