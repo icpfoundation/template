@@ -5,19 +5,6 @@
       "candid": "src/template/src/lib.did",
       "wasm": "target/wasm32-unknown-unknown/release/template.wasm",
       "type": "custom"
-    },
-    "template_assets": {
-      "dependencies": [
-        "template"
-      ],
-      "frontend": {
-        "entrypoint": "src/template_assets/src/index.html"
-      },
-      "source": [
-        "src/template_assets/assets",
-        "dist/template_assets/"
-      ],
-      "type": "assets"
     }
   },
   "defaults": {

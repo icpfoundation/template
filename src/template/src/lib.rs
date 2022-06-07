@@ -7,6 +7,7 @@ use ic_cdk::export::Principal;
 use ic_cdk::storage;
 use ic_cdk_macros::*;
 use std::collections::HashMap;
+ic_cdk::export::candid::export_service!();
 static mut TotalSupply: Option<Nat> = None;
 static mut CurrentSupply: Option<Nat> = None;
 static mut Symbol: Option<String> = None;
@@ -42,7 +43,10 @@ async fn mint(account: Principal, amount: Nat) -> () {
         CurrentSupply = Some(current)
     }
     let balance_table = storage::get_mut::<BalanceOf>();
-    let balance = balance_table.get(&account).cloned().unwrap_or_else(|| Nat::default());
+    let balance = balance_table
+        .get(&account)
+        .cloned()
+        .unwrap_or_else(|| Nat::default());
     let new_balance = balance + amount.clone();
     balance_table.insert(account, new_balance);
     let memo = format!("{:?} mint {:?} token", account.to_string(), amount);
@@ -58,16 +62,22 @@ async fn mint(account: Principal, amount: Nat) -> () {
 async fn transfer(to: Principal, amount: Nat) -> () {
     let caller = api::caller();
     let balance_table = storage::get_mut::<BalanceOf>();
-    let balance = balance_table.get(&caller).cloned().unwrap_or_else(|| Nat::default());
+    let balance = balance_table
+        .get(&caller)
+        .cloned()
+        .unwrap_or_else(|| Nat::default());
     if balance < amount {
         api::trap("Sorry, your credit is running low")
     }
     let new_balance = balance - amount.clone();
     balance_table.insert(caller, new_balance);
-    let to_balance = balance_table.get(&to).cloned().unwrap_or_else(|| Nat::default());
+    let to_balance = balance_table
+        .get(&to)
+        .cloned()
+        .unwrap_or_else(|| Nat::default());
     let to_new_balance = to_balance + amount.clone();
     balance_table.insert(to, to_new_balance);
-    let memo = format!("{:?} transfer {:?}",caller.to_string(),amount);
+    let memo = format!("{:?} transfer {:?}", caller.to_string(), amount);
     api::print(&memo);
     let transfer_event = TransferEvent {
         method_name: "transfer".to_string(),
@@ -79,28 +89,25 @@ async fn transfer(to: Principal, amount: Nat) -> () {
 #[query]
 fn balance_of(account: Principal) -> Nat {
     let balance_table = storage::get::<BalanceOf>();
-    balance_table.get(&account).cloned().unwrap_or_else(|| Nat::default())
+    balance_table
+        .get(&account)
+        .cloned()
+        .unwrap_or_else(|| Nat::default())
 }
 
 #[query]
 fn symbol() -> String {
-    unsafe{
-        Symbol.as_ref().unwrap().clone()
-    }
+    unsafe { Symbol.as_ref().unwrap().clone() }
 }
 
 #[query]
 fn current_supply() -> Nat {
-    unsafe{
-        CurrentSupply.as_ref().unwrap().clone()
-    }
+    unsafe { CurrentSupply.as_ref().unwrap().clone() }
 }
 
 #[query]
 fn total_supply() -> Nat {
-    unsafe{
-        TotalSupply.as_ref().unwrap().clone()
-    }
+    unsafe { TotalSupply.as_ref().unwrap().clone() }
 }
 
 #[post_upgrade]
@@ -110,4 +117,9 @@ fn post_update() {
         CurrentSupply = Some(0.into());
         Symbol = Some("ICP".to_string());
     }
+}
+
+#[query(name = "__get_candid_interface_tmp_hack")]
+fn export_candid() -> String {
+    include_str!("./lib.did").to_string()
 }
