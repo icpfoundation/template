@@ -7,6 +7,7 @@ use ic_cdk::export::Principal;
 use ic_cdk::storage;
 use ic_cdk_macros::*;
 use std::collections::HashMap;
+ic_cdk::export::candid::export_service!();
 static mut TotalSupply: Option<Nat> = None;
 static mut CurrentSupply: Option<Nat> = None;
 static mut Symbol: Option<String> = None;
@@ -34,7 +35,7 @@ fn init(total_supply: Nat, symbol: String) {
     }
 }
 #[update]
-async fn mint(account: Principal, amount: Nat) -> () {
+async fn mint(account: Principal, amount: Nat) -> String {
     unsafe {
         let mut current = CurrentSupply.as_mut().unwrap().clone();
         let total = TotalSupply.as_mut().unwrap().clone();
@@ -59,7 +60,7 @@ async fn mint(account: Principal, amount: Nat) -> () {
     };
     let result = emit(mint_event).await;
     let result = format!("{:?}", result);
-    ic_cdk::print(result);
+    result
 }
 
 #[update]
@@ -82,6 +83,7 @@ async fn transfer(to: Principal, amount: Nat) -> () {
     let to_new_balance = to_balance + amount.clone();
     balance_table.insert(to, to_new_balance);
     let memo = format!("{:?} transfer {:?}", caller.to_string(), amount);
+    api::print(&memo);
     let transfer_event = TransferEvent {
         method_name: "transfer".to_string(),
         memo: memo,
@@ -121,4 +123,9 @@ fn post_update() {
         CurrentSupply = Some(0.into());
         Symbol = Some("ICP".to_string());
     }
+}
+
+#[query(name = "__get_candid_interface_tmp_hack")]
+fn export_candid() -> String {
+    include_str!("./lib.did").to_string()
 }
